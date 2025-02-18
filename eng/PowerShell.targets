@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+***********************************************************************************************
+Directory.Build.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) Ollon, LLC. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <ModuleFolder>$(OutputPath)\$(AssemblyName)\</ModuleFolder>
+    <DestinationModuleManifest>$(ModuleFolder)$(AssemblyName).psd1</DestinationModuleManifest>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <PowerShellRootModule>$(AssemblyName).dll</PowerShellRootModule>
+    <PowerShellModuleVersion>1.0.0.0</PowerShellModuleVersion>
+    <PowerShellGUID>$([System.Guid]::NewGuid().ToString('D'))</PowerShellGUID>
+    <PowerShellAuthor Condition="'$(Authors)' != ''">$(Authors)</PowerShellAuthor>
+    <PowerShellCompanyName Condition="'$(Company)' != ''">$(Company)</PowerShellCompanyName>
+    <PowerShellCopyright Condition="'$(Copyright)' != ''">$(Copyright)</PowerShellCopyright>
+    <PowerShellCmdletsToExport Condition="'$(PowerShellCmdletsToExport)' == ''">%2A</PowerShellCmdletsToExport>
+    <PowerShellAliasesToExport Condition="'$(PowerShellAliasesToExport)' == ''">%2A</PowerShellAliasesToExport>
+    <PowerShellDefaultCommandPrefix Condition="'$(PowerShellDefaultCommandPrefix)' == ''"></PowerShellDefaultCommandPrefix>
+  </PropertyGroup>
+  
+  <Target Name="PowerShellModuleClean" Condition="'$(UsingToolPowerShell)'=='true'">
+    <ItemGroup>
+      <RemoveFiles Include="$(OutputPath)\**\*" />
+    </ItemGroup>
+    <RemoveDir Directories="$(ModuleFolder)" />
+    <Delete Files="@(RemoveFiles)" />
+    <Message Importance="high" Text="@(RemoveFiles->'Removing file %(Filename)%0A')" />
+    <Message Importance="high" Text="PowerShellModuleClean Executed Successfully!" />
+  </Target>
+
+  <Target Name="CreateDebuggableModule" AfterTargets="AfterBuild" Condition="'$(UsingToolPowerShell)'=='true'">
+    <PropertyGroup>
+      <ModuleFolder>$(OutputPath)\$(AssemblyName)\</ModuleFolder>
+      <DestinationModuleManifest>$(ModuleFolder)$(AssemblyName).psd1</DestinationModuleManifest>
+    </PropertyGroup>
+    <ItemGroup>
+      <CopyFiles Include="$(OutputPath)\*.dll" />
+      <CopyFiles Include="@(Content)" />
+      <_ModuleManifestFileLines Include="@{" />
+      <_ModuleManifestFileLines Include="    RootModule           = '$(PowerShellRootModule)'" />
+      <_ModuleManifestFileLines Include="    ModuleVersion        = '$(PowerShellModuleVersion)'" />
+      <_ModuleManifestFileLines Include="    GUID                 = '$(PowerShellGuid)'" />
+      <_ModuleManifestFileLines Include="    Author               = '$(PowerShellAuthor)'" />
+      <_ModuleManifestFileLines Include="    CompanyName          = '$(PowerShellCompanyName)'" />
+      <_ModuleManifestFileLines Include="    Copyright            = '$(PowerShellCopyright)'" />
+      <_ModuleManifestFileLines Include="    CmdletsToExport      = '$(PowerShellCmdletsToExport)'" />
+      <_ModuleManifestFileLines Include="    AliasesToExport      = '$(PowerShellAliasesToExport)'" />
+      <_ModuleManifestFileLines Include="    DefaultCommandPrefix = '$(PowerShellDefaultCommandPrefix)'" />
+      <_ModuleManifestFileLines Include="}" />
+    </ItemGroup>
+    <MakeDir Directories="$(ModuleFolder)" />
+    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ModuleFolder)" OverwriteReadOnlyFiles="true" />
+    <WriteLinesToFile Lines="@(_ModuleManifestFileLines)" File="$(DestinationModuleManifest)" Overwrite="true" />
+  </Target>
+  
+</Project>
