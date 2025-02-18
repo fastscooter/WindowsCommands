@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "PowershellModuleDebug": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "commandLineArgs": "-NoExit -Command \"Import-Module .\\$(AssemblyName) -Verbose\"",
+      "workingDirectory": "$(OutputPath)"
+    }
+  }
+}
